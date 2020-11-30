@@ -1,7 +1,9 @@
-import logo from './logo.svg';
+
 import './App.css';
 //importing the components from reactstrap to create the navbar
 import { Navbar, NavbarBrand } from 'reactstrap';
+import Menu from './components/MenuComponent';
+
 
 function App() {
     return (
@@ -12,6 +14,10 @@ function App() {
         <NavbarBrand href="/">  Ristorante Con Fusion</NavbarBrand>
         </div>
        </Navbar>
+       
+       {/* created and used menu component here */}
+    <Menu />
+   
       </div>
     );
 } export default App;
