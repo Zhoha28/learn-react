@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { Loading } from './LoadingComponent';
 import {
   Card,
   CardImg,
@@ -21,6 +22,7 @@ import { Link } from "react-router-dom";
 const required = (val) => val && val.length;
 const maxLength = (len) => (val) => !val || val.length <= len;
 const minLength = (len) => (val) => val && val.length >= len;
+
 class CommentForm extends Component {
   constructor(props) {
     super(props);
@@ -30,15 +32,20 @@ class CommentForm extends Component {
     this.toggleModal = this.toggleModal.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
+
   toggleModal() {
     this.setState({
       isModalOpen: !this.state.isModalOpen,
     });
   }
   handleSubmit(values) {
-    console.log("current state is" + JSON.stringify(values));
-    alert("current state is" + JSON.stringify(values));
-    //event.preventDefault();
+    this.toggleModal();
+    this.props.addComment(
+      this.props.dishId,
+      values.rating,
+      values.author,
+      values.comment
+    );
   }
 
   render() {
@@ -50,13 +57,13 @@ class CommentForm extends Component {
         <Modal isOpen={this.state.isModalOpen} toggle={this.toggleModal}>
           <ModalHeader toggle={this.toggleModal}>Submit Comment</ModalHeader>
           <ModalBody>
-            <LocalForm onSubmit={(values) => this.handleSubmit(values)}>
+            <LocalForm onSubmit={this.handleSubmit}>
               <Row className="form-group">
                 <Label htmlFor="rating" md={12}>
                   Rating
                 </Label>
                 <Col md={{ size: 12 }}>
-                  <Control.select
+                <Control.select
                     model=".rating"
                     name="rating"
                     className="form-control"
@@ -69,16 +76,15 @@ class CommentForm extends Component {
                   </Control.select>
                 </Col>
               </Row>
-
               <Row className="form-group">
-                <Label htmlFor="name" md={12}>
+                <Label htmlFor="author" md={12}>
                   Your Name
                 </Label>
                 <Col md={12}>
                   <Control.text
-                    model=".name"
-                    id="name"
-                    name="name"
+                    model=".author"
+                    id="author"
+                    name="author"
                     placeholder="Your Name"
                     className="form-control"
                     validators={{
@@ -89,7 +95,7 @@ class CommentForm extends Component {
                   />
                   <Errors
                     className="text-danger"
-                    model=".name"
+                    model=".author"
                     show="touched"
                     messages={{
                       required: "Required",
@@ -99,28 +105,23 @@ class CommentForm extends Component {
                   />
                 </Col>
               </Row>
-
               <Row className="form-group">
-                <Label htmlFor="Comment" md={12}>
+                <Label htmlFor="comment" md={12}>
                   Comment
                 </Label>
                 <Col md={12}>
                   <Control.textarea
-                    model=".Comment"
-                    id="Comment"
-                    name="Comment"
-                    rows="6"
+                    model=".comment"
+                    id="comment"
+                    name="comment"
+                    rows={5}
                     className="form-control"
                   />
                 </Col>
               </Row>
-              <Row className="form-group">
-                <Col md={{ size: 10 }}>
-                  <Button type="submit" color="primary">
-                    Send Feedback
-                  </Button>
-                </Col>
-              </Row>
+              <Button type="submit" value="submit" color="primary">
+                Submit
+              </Button>
             </LocalForm>
           </ModalBody>
         </Modal>
@@ -131,6 +132,7 @@ class CommentForm extends Component {
 
 // function RenderDish(props){}
 function RenderDish({ dish }) {
+ 
   if (dish != null) {
     return (
       <div className="col-12 col-md-5 m-1">
@@ -149,7 +151,7 @@ function RenderDish({ dish }) {
 }
 
 // function RenderComments(props){}
-function RenderComments({ comments }) {
+function RenderComments({ comments, addComment, dishId }) {
   if (comments != null) {
     const cmnts = comments.map((commnts) => {
       return (
@@ -174,6 +176,7 @@ function RenderComments({ comments }) {
       <div className="col-12 col-md-5 m-1">
         <h4> Comments </h4>
         {cmnts}
+        <CommentForm dishId={dishId} addComment={addComment} />
       </div>
     );
     // if comments is empty
@@ -183,8 +186,26 @@ function RenderComments({ comments }) {
 }
 
 const DishDetail = (props) => {
-  console.log(props);
-  if (props.dish != null) {
+
+  if (props.isLoading) {
+    return(
+      <div className="container">
+        <div className="row">            
+                        <Loading />
+                    </div>
+      </div>
+    )
+  }
+  else if (props.errorMessage) {
+    return(
+        <div className="container">
+            <div className="row">            
+                <h4>{props.errorMessage}</h4>
+            </div>
+        </div>
+    );
+    }
+    else if (props.dish != null) {
     return (
       <div className="container">
         <div className="row">
@@ -201,13 +222,19 @@ const DishDetail = (props) => {
         </div>
         <div className="row">
           <RenderDish dish={props.dish} />
-          <RenderComments comments={props.comments} />
 
-          <CommentForm />
+          <RenderComments
+            comments={props.comments}
+            addComment={props.addComment}
+            dishId={props.dish.id}
+          />
+
+       
         </div>
       </div>
     );
-  } else {
+  }
+  else {
     return (
       <div>
         <h3>NUL</h3>
