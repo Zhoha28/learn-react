@@ -2,7 +2,7 @@ import React, { Component } from "react";
 //importing the components from reactstrap to create the navbar
 
 import Menu from "./MenuComponent";
-import { actions } from 'react-redux-form';
+import { actions } from "react-redux-form";
 import DishDetail from "./dishDetails";
 import Header from "./Header";
 import Footer from "./FooterComponent";
@@ -11,7 +11,12 @@ import { Switch, Route, Redirect, withRouter } from "react-router-dom";
 import { connect } from "react-redux";
 import About from "./AboutUsComponent";
 import ContactUs from "./ContactComponent";
-import { addComment, fetchDishes } from "../redux/ActionCreators";
+import {
+  addComment,
+  fetchDishes,
+  fetchComments,
+  fetchPromos,
+} from "../redux/ActionCreators";
 
 const mapStateToProps = (state) => {
   return {
@@ -28,8 +33,11 @@ const mapDispatchToProps = (dispatch) => ({
   fetchDishes: () => {
     dispatch(fetchDishes());
   },
-  resetFeedbackForm: () => { dispatch(actions.reset('feedback'))}
-  
+  resetFeedbackForm: () => {
+    dispatch(actions.reset("feedback"));
+  },
+  fetchComments: () => dispatch(fetchComments()),
+  fetchPromos: () => dispatch(fetchPromos()),
 });
 
 class Main extends Component {
@@ -40,17 +48,23 @@ class Main extends Component {
 
   componentDidMount() {
     this.props.fetchDishes();
+    this.props.fetchComments();
+    this.props.fetchPromos();
   }
 
   render() {
     const HomePage = () => {
+      console.log(this.props.dishes);
       return (
+        
         <Home
-          dish={this.props.dishes.dishes.filter((dish) => dish.featured)[0]}
-          dishesLoading={this.props.dishes.isLoading}
-          dishesErrorMessage={this.props.dishes.errorMessage}
-          promotion={this.props.promotions.filter((promo) => promo.featured)[0]}
-          leader={this.props.leaders.filter((leader) => leader.featured)[0]}
+           dish={this.props.dishes.dishes.filter((dish) => dish.featured)[0]}
+              dishesLoading={this.props.dishes.isLoading}
+              dishErrorMessage={this.props.dishes.errorMessage}
+              promotion={this.props.promotions.promotions.filter((promo) => promo.featured)[0]}
+              promoLoading={this.props.promotions.isLoading}
+              promoErrorMessage={this.props.promotions.errorMessage}
+              leader={this.props.leaders.filter((leader) => leader.featured)[0]}
         />
       );
     };
@@ -66,11 +80,10 @@ class Main extends Component {
           }
           isLoading={this.props.dishes.isLoading}
           errorMessage={this.props.dishes.errorMessage}
-
-          comments={this.props.comments.filter(
-            (comment) => comment.dishId === parseInt(match.params.dishId, 10)
-          )}
-          addComment={this.props.addComment}
+          comments={this.props.comments.comments.filter((comment) => comment.dishId === parseInt(match.params.dishId,10))}
+            commentsErrorMessage={this.props.comments.errorMessage}
+            addComment={this.props.addComment}
+        
         />
       );
     };
@@ -95,8 +108,14 @@ class Main extends Component {
             component={() => <About leaders={this.props.leaders} />}
           />
 
-          <Route exact path="/ContactUs" component={() => <ContactUs resetFeedbackForm={this.props.resetFeedbackForm} />} />
-            
+          <Route
+            exact
+            path="/ContactUs"
+            component={() => (
+              <ContactUs resetFeedbackForm={this.props.resetFeedbackForm} />
+            )}
+          />
+
           {/* default route */}
           <Redirect to="/home" />
         </Switch>
