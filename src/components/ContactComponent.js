@@ -1,16 +1,13 @@
-/* eslint-disable react/jsx-pascal-case */
 import React, { Component } from "react";
-
 import {
   Breadcrumb,
   BreadcrumbItem,
   Button,
   Row,
   Col,
-  Label,
+  Label
 } from "reactstrap";
-import { Control, Form, Errors, actions } from 'react-redux-form';
-
+import { Control, Form, Errors } from "react-redux-form";
 import { Link } from "react-router-dom";
 
 const required = (val) => val && val.length;
@@ -29,10 +26,16 @@ class ContactUs extends React.Component {
 
   //handling after clicking on submit button
   handleSubmit(values) {
-    console.log("current state is" + JSON.stringify(values));
-    alert("current state is" + JSON.stringify(values));
-    //event.preventDefault();
     this.props.resetFeedbackForm();
+    this.props.postFeedback(
+      values.firstname,
+      values.lastname,
+      values.telnum,
+      values.email,
+      values.agree,
+      values.contactType,
+      values.message
+    );
   }
  
 
