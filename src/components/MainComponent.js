@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 //importing the components from reactstrap to create the navbar
-
+import { TransitionGroup, CSSTransition } from 'react-transition-group';
 import Menu from "./MenuComponent";
 import { actions } from "react-redux-form";
 import DishDetail from "./dishDetails";
@@ -11,12 +11,7 @@ import { Switch, Route, Redirect, withRouter } from "react-router-dom";
 import { connect } from "react-redux";
 import About from "./AboutUsComponent";
 import ContactUs from "./ContactComponent";
-import {
-  addComment,
-  fetchDishes,
-  fetchComments,
-  fetchPromos,
-} from "../redux/ActionCreators";
+import { postComment, fetchDishes, fetchComments, fetchPromos } from '../redux/ActionCreators';
 
 const mapStateToProps = (state) => {
   return {
@@ -28,8 +23,7 @@ const mapStateToProps = (state) => {
 };
 
 const mapDispatchToProps = (dispatch) => ({
-  addComment: (dishId, rating, author, comment) =>
-    dispatch(addComment(dishId, rating, author, comment)),
+  postComment: (dishId, rating, author, comment) => dispatch(postComment(dishId, rating, author, comment)),
   fetchDishes: () => {
     dispatch(fetchDishes());
   },
@@ -50,6 +44,7 @@ class Main extends Component {
     this.props.fetchDishes();
     this.props.fetchComments();
     this.props.fetchPromos();
+    
   }
 
   render() {
@@ -82,7 +77,7 @@ class Main extends Component {
           errorMessage={this.props.dishes.errorMessage}
           comments={this.props.comments.comments.filter((comment) => comment.dishId === parseInt(match.params.dishId,10))}
             commentsErrorMessage={this.props.comments.errorMessage}
-            addComment={this.props.addComment}
+            postComment={this.props.postComment}
         
         />
       );
@@ -93,7 +88,9 @@ class Main extends Component {
         <Header />
 
         {/* react router to navigate */}
-        <Switch>
+        <TransitionGroup>
+            <CSSTransition key={this.props.location.key} classNames="page" timeout={300}>
+              <Switch location={this.props.location}>
           <Route path="/home" component={HomePage} />
 
           <Route
@@ -118,8 +115,9 @@ class Main extends Component {
 
           {/* default route */}
           <Redirect to="/home" />
-        </Switch>
-
+          </Switch>
+            </CSSTransition>
+          </TransitionGroup>
         <Footer />
       </div>
     );
